@@ -1,1 +1,1 @@
-curl-cmake.sh
+curl-autotools.sh
