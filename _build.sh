@@ -1273,11 +1273,11 @@ build_single_target() {
       ccrtlib="-Wl,-lgcc -Wl,-lgcc_eh"
       _LDFLAGS_CXX_GLOBAL+=' -nostdlib++'
       ccridir="$("clang${_CCSUFFIX}" -print-resource-dir)"                             # /usr/lib/llvm-13/lib/clang/13.0.1
+      _LDFLAGS_GLOBAL_AUTOTOOLS+=' -XCClinker -nostartfiles'
     fi
     libprefix="/usr/lib/${_machine}-linux-musl"
     _CFLAGS_GLOBAL+=" -static -nostdinc -isystem ${ccridir}/include -isystem /usr/include/${_machine}-linux-musl"
     _LDFLAGS_GLOBAL+=" -nostartfiles -Wl,${libprefix}/Scrt1.o -Wl,${libprefix}/crti.o -Wl,${libprefix}/crtn.o"
-    _LDFLAGS_GLOBAL_AUTOTOOLS+=' -XCClinker -nostartfiles'
     _LDFLAGS_GLOBAL+=" -L${libprefix} -L${ccrsdir} -Wl,-lc ${ccrtlib}"
   fi
 
