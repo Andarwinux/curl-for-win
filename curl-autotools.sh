@@ -374,7 +374,7 @@ _VER="$1"
   (
     mkdir "${_BLDDIR}"; cd "${_BLDDIR}"
     # shellcheck disable=SC2086
-    ../configure ${options} \
+    if ! ../configure ${options} \
       --disable-tls-srp \
       --enable-warnings \
       --enable-symbol-hiding \
@@ -394,7 +394,10 @@ _VER="$1"
       --enable-dnsshuffle \
       --enable-get-easy-options \
       --without-ca-path \
-      --without-ca-bundle
+      --without-ca-bundle; then
+      cat 'config.log'
+      exit 1
+    fi
   )
 
   # NOTE: 'make clean' deletes src/tool_hugehelp.c and docs/curl.1. Next,
