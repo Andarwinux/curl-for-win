@@ -61,7 +61,7 @@ _VER="$1"
     [ "${_CPU}" = 'r64' ] && options+=' linux64-riscv64 no-asm'  # FIXME: disabled ASM to avoid 'AES_set_encrypt_key' relocation errors at link time
   fi
 
-  options+=" ${_LDFLAGS_GLOBAL} ${_CFLAGS_GLOBAL_CMAKE} ${_CFLAGS_GLOBAL} ${_CPPFLAGS_GLOBAL}"
+  #options+=" ${_LDFLAGS_GLOBAL} ${_CFLAGS_GLOBAL_CMAKE} ${_CFLAGS_GLOBAL} ${_CPPFLAGS_GLOBAL}"
   if [ "${_OS}" = 'win' ]; then
     options+=' -DUSE_BCRYPTGENRANDOM -lbcrypt'
   fi
@@ -180,6 +180,8 @@ _VER="$1"
   (
     mkdir "${_BLDDIR}"; cd "${_BLDDIR}"
     # shellcheck disable=SC2086
+    export CFLAGS=" -O3 -march=tigerlake"
+    export CXXFLAGS=" -O3 -march=tigerlake"
     ../Configure ${options} \
       no-filenames \
       no-legacy \
@@ -195,6 +197,7 @@ _VER="$1"
       no-dsa \
       no-tests \
       no-makedepend \
+      enable-ec_nistp_64_gcc_128 \
       "--prefix=${_my_prefix}" \
       "--openssldir=${_ssldir}"
   )

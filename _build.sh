@@ -1103,8 +1103,8 @@ build_single_target() {
       # the executables fail to run anyway. It means that cfguard needs
       # llvm-mingw with all objects compiled with cfguard, and cfguard enabled
       # at link time to end up with a runnable exe.
-      _CFLAGS_GLOBAL+=' -mguard=cf'
-      _LDFLAGS_GLOBAL+=' -mguard=cf'
+      _CFLAGS_GLOBAL+=' -O3 -freroll-loops -funroll-loops -ffp-contract=fast -pipe -pthread -fno-emulated-tls -fno-semantic-interposition -fvisibility=hidden -fstrict-vtable-pointers -fforce-emit-vtables -fomit-frame-pointer -funique-section-names -momit-leaf-frame-pointer -fmerge-all-constants -mguard=cf -march=tigerlake -D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00 -D_UCRT -mprefer-vector-width=512 -pipe -Xclang -ehcontguard -Wno-unused-command-line-argument -Wno-macro-redefined'
+      _LDFLAGS_GLOBAL+=' -O3 -freroll-loops -funroll-loops -ffp-contract=fast -pipe -pthread -fno-emulated-tls -fno-semantic-interposition -fvisibility=hidden -fstrict-vtable-pointers -fforce-emit-vtables -fomit-frame-pointer -funique-section-names -momit-leaf-frame-pointer -fmerge-all-constants -mguard=cf -march=tigerlake -D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00 -D_UCRT -mprefer-vector-width=512 -pipe -Xclang -ehcontguard -Xlinker -Xlink='-guard:cf,longjmp,ehcont' -Wl,--no-insert-timestamp,--major-os-version=10,--major-subsystem-version=6,--minor-subsystem-version=2,--file-alignment=4096 -Wno-unused-command-line-argument -Wno-macro-redefined'
     fi
 
     if [ -n "${_SYSROOT}" ]; then
@@ -1323,8 +1323,8 @@ build_single_target() {
   # https://convolv.es/guides/lto/
   if [[ "${_CONFIG}" = *'thinlto'* ]]; then
     if [[ "${_CC}" = 'llvm' ]]; then
-      _CFLAGS_GLOBAL+=' -flto=thin'
-      _CXXFLAGS_GLOBAL+=' -flto=thin'
+      _CFLAGS_GLOBAL+=' -flto=thin -O3 -fwhole-program-vtables -Xlinker -Xlink=-opt:lldlto=3 -Xlinker -Xlink=-opt:lldltocgo=3'
+      _CXXFLAGS_GLOBAL+=' -flto=thin -O3 -fwhole-program-vtables -Xlinker -Xlink=-opt:lldlto=3 -Xlinker -Xlink=-opt:lldltocgo=3'
 
       # `llvm-strip` as of v17 does not support ThinLTO objects, with:
       #   The file was not recognized as a valid object file

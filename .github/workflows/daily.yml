@@ -4,9 +4,10 @@
 # https://docs.github.com/actions/learn-github-actions
 name: daily
 on:
-  schedule:
+  workflow_dispatch:
+  #schedule:
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
-    - cron: '29 20 * * *'
+  #- cron: '29 20 * * *'
 
 permissions: {}
 
@@ -19,144 +20,7 @@ env:
   DOCKER_CONTENT_TRUST: '1'
 
 jobs:
-  linux-glibc:
-    if: ${{ github.repository_owner == 'curl' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - name: 'build'
-        run: |
-          export CW_CONFIG='dev-linux'
-          export CW_REVISION="$(TZ=UTC date +'%Y%m%d')"
-          DOCKER_IMAGE='debian:bookworm-slim'
-          export CW_CCSUFFIX='-15'
-          export CW_GCCSUFFIX='-12'
-          docker trust inspect --pretty "${DOCKER_IMAGE}"
-          time docker pull "${DOCKER_IMAGE}"
-          docker images --digests
-          time docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
-            --env-file <(env | grep -a -E \
-              '^(CW_|GITHUB_|DO_NOT_TRACK)') \
-            "${DOCKER_IMAGE}" \
-            sh -c ./_ci-linux-debian.sh
-
-      - name: 'list dependencies'
-        run: cat urls.txt
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 'curl-linux-glibc-daily-tool'
-          retention-days: 42
-          path: curl-*-*-*/curl*
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 'curl-linux-glibc-daily'
-          retention-days: 42
-          path: |
-            *-*-linux*.*
-            urls.txt
-
-  linux-musl:
-    if: ${{ github.repository_owner == 'curl' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - name: 'build'
-        run: |
-          export CW_CONFIG='dev-linux-musl'
-          export CW_REVISION="$(TZ=UTC date +'%Y%m%d')"
-          . ./_versions.sh
-          docker trust inspect --pretty "${DOCKER_IMAGE}"
-          time docker pull "${DOCKER_IMAGE}"
-          docker images --digests
-          time docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
-            --env-file <(env | grep -a -E \
-              '^(CW_|GITHUB_|DO_NOT_TRACK)') \
-            "${DOCKER_IMAGE}" \
-            sh -c ./_ci-linux-debian.sh
-
-      - name: 'list dependencies'
-        run: cat urls.txt
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 'curl-linux-musl-daily-tool'
-          retention-days: 42
-          path: curl-*-*-*/curl*
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 'curl-linux-musl-daily'
-          retention-days: 42
-          path: |
-            *-*-linux*.*
-            urls.txt
-
-  linux-musl-riscv64:
-    if: ${{ github.repository_owner == 'curl' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - name: 'build'
-        run: |
-          export CW_CONFIG='dev-linux-musl-r64'
-          export CW_REVISION="$(TZ=UTC date +'%Y%m%d')"
-          DOCKER_IMAGE='debian:sid-slim'
-          export CW_CCSUFFIX='-17'
-          export CW_GCCSUFFIX='-13'
-          docker trust inspect --pretty "${DOCKER_IMAGE}"
-          time docker pull "${DOCKER_IMAGE}"
-          docker images --digests
-          time docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
-            --env-file <(env | grep -a -E \
-              '^(CW_|GITHUB_|DO_NOT_TRACK)') \
-            "${DOCKER_IMAGE}" \
-            sh -c ./_ci-linux-debian.sh
-
-      - name: 'list dependencies'
-        run: cat urls.txt
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 'curl-linux-musl-riscv64-daily-tool'
-          retention-days: 42
-          path: curl-*-*-*/curl*
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 'curl-linux-musl-riscv64-daily'
-          retention-days: 42
-          path: |
-            *-*-linux*.*
-            urls.txt
-
-  mac:
-    if: ${{ github.repository_owner == 'curl' }}
-    runs-on: macos-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - name: 'build'
-        run: |
-          export CW_CONFIG='dev-mac-macuni'
-          export CW_REVISION="$(TZ=UTC date +'%Y%m%d')"
-          sh -c ./_ci-mac-homebrew.sh
-
-      - name: 'list dependencies'
-        run: cat urls.txt
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 'curl-macos-universal-daily-tool'
-          retention-days: 42
-          path: curl-*-universal-*/curl*
-      - uses: actions/upload-artifact@v4
-        with:
-          name: 'curl-macos-universal-daily'
-          retention-days: 42
-          path: |
-            *-*-macos*.*
-            urls.txt
-
   win:
-    if: ${{ github.repository_owner == 'curl' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -166,9 +30,9 @@ jobs:
       - name: 'build'
         env:
           CW_LLVM_MINGW_DL: '1'
-          CW_LLVM_MINGW_ONLY: '0'
+          CW_LLVM_MINGW_ONLY: '1'
         run: |
-          export CW_CONFIG='dev-win'
+          export CW_CONFIG='dev-win-x64-openssl-zlibng-thinlto'
           export CW_REVISION="$(TZ=UTC date +'%Y%m%d')"
           . ./_versions.sh
           docker trust inspect --pretty "${DOCKER_IMAGE}"
